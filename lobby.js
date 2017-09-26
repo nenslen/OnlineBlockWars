@@ -1,11 +1,19 @@
-function Lobby() {
+function Lobby(id) {
+	this.id = id;
+	this.name = "Lobby " + (id + 1);
 	this.maxPlayers = 2;
-	this.game = new BlockPuzzle();
+	this.game;// = new BlockPuzzle();
 	this.users = [];
 
 
-	// Starts the game
+	// Starts the game and assign player IDs
 	this.start = function() {
+		
+		// Assign player numbers
+		for(var i = 0; i < this.users.length; i++) {
+			this.users[i].playerNumber = i + 1;
+		}
+		
 		this.game.start();
 	}
 
@@ -13,6 +21,7 @@ function Lobby() {
 	// Resets the game
 	this.reset = function() {
 		this.game.reset();
+		this.users = [];
 	}
 
 
@@ -57,3 +66,5 @@ function Lobby() {
 		return true;
 	}
 }
+
+exports.lobby = Lobby;

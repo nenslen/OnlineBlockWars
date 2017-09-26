@@ -2,7 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
-
+var lobby = require('./lobby.js');
+var bp = require('./blockpuzzle/blockpuzzle.js');
 
 
 // Deliver static files
@@ -27,7 +28,11 @@ server.lastPlayerID = 0;
 
 
 var lobbies = [];
-lobbies[0] = new Lobby();
+
+for(var i = 0; i < 10; i++) {
+    lobbies[i] = new lobby.lobby(i);
+    lobbies[i].game = new bp.bp();
+}
 
 
 // Connection event
@@ -79,17 +84,19 @@ io.on('connection', function(socket) {
         }
 
 
-        // Add user to lobby
+        // Add user to lobby (if not full)
         var lobby = lobbies[lobbyID];
 
         if(lobby.isFull() === false) {
             socket.user.currentLobby = lobbyID;
             socket.join(lobby.name);
-            lobby.addUser(socket.user);
             socket.emit('lobbyJoinSuccess');
+            lobby.addUser(socket.user);
 
-            // Notify players in lobby
-            io.sockets.in(lobby.name).emit('currentLobbyData', lobby);
+
+            // Notify all players
+            sendCurrentLobbyData(0, lobbyID);
+            sendAllLobbyData();
         } else {
             socket.emit('lobbyJoinError', "Unable to join lobby, lobby is full");
         }
@@ -100,34 +107,7 @@ io.on('connection', function(socket) {
 
     // Removes user from lobby
     socket.on('leaveLobby', function() {
-
-        // Make sure user is in a lobby
-        if(socket.user.currentLobby == -1) {
-            return;
-        }
-
-
-        var lobbyID = socket.user.currentLobby;
-        var lobby = lobbies[lobbyID];
-
-
-        // Remove user from lobby
-        lobby.removeUser(socket.user.id);
-        socket.user.currentLobby = -1;
-        socket.leave(lobby.name);
-        socket.emit('disconnectedFromLobby', "Disconnected from lobby");
-
-
-        // Alert users still in lobby
-        if(lobby.game.started === true) {
-            if(lobby.game.gameOver === true) {
-                io.sockets.in(lobby.name).emit('currentLobbyData', lobby);
-            } else {
-                io.sockets.in(lobby.name).emit('gameOverError', "Opponent has disconnected");
-            }
-        } else {
-            io.sockets.in(lobby.name).emit('currentLobbyData', lobby);
-        }
+        removeFromLobby(socket);
     });
 
 
@@ -135,7 +115,7 @@ io.on('connection', function(socket) {
 
     // Sends the client all lobbies
     socket.on('requestAllLobbyData', function() {
-        socket.emit('allLobbyData', lobbies);
+        sendAllLobbyData(socket);
     });
 
 
@@ -143,9 +123,7 @@ io.on('connection', function(socket) {
 
     // Sends the client their current lobby data
     socket.on('requestCurrentLobbyData', function() {
-        if(socket.user.currentLobby != -1) {
-            socket.emit('currentLobbyData', lobbies[lobbyID]);
-        }
+        sendCurrentLobbyData(socket, socket.user.currentLobby);
     });
 
 
@@ -185,13 +163,20 @@ io.on('connection', function(socket) {
 
 
         // Update game for all players
-        io.sockets.in(lobby.name).emit('gameData', lobby.game);
+        sendGameData(0, lobby);
+
+
+        // End game if gameover
+        if(lobby.game.gameOver === true) {
+            sendGameOverMessage(lobby);
+            resetLobby(lobby.id);
+        }
     });
 
 
 
 
-    // Changes the ready state of the player
+    // Changes the ready state of the player and starts game if all users are ready
     socket.on('readyUp', function(isReady) {
 
         // Make sure user is in a lobby
@@ -207,22 +192,146 @@ io.on('connection', function(socket) {
         // Start game if all players ready
         var lobby = lobbies[socket.user.currentLobby];
         if(lobby.allReady() === true) {
+            // Assign player
             lobby.start();
-            io.sockets.in(lobby.name).emit('gameStarting');
+            io.to(lobby.name).emit('gameStarting');
         }
 
 
         // Notify other users
-        io.sockets.in(lobby.name).emit('currentLobbyData', lobby);
+        sendCurrentLobbyData(0, lobby.id);
     });
 
 
 
 
-    // Sends the game data to user
+    // Sends the game data and player's number to user
     socket.on('requestGameData', function() {
-        if(socket.user.currentLobby != -1) {
-            socket.emit('gameData', lobbies[socket.user.currentLobby].game);
+        sendGameData(socket);
+    });
+
+
+
+
+    // Disconnects a player from the server
+    socket.on('disconnect', function() {
+        console.log('User disconnected');
+        if(socket.user) {
+            removeFromLobby(socket);
         }
     });
 });
+
+
+// Removes user from lobby and alerts other players
+function removeFromLobby(socket) {
+
+    console.log("removing user from lobby...");
+
+    // Make sure user is in a lobby
+    var lobbyID = socket.user.currentLobby;
+    if(lobbyID == -1) {
+        return;
+    }
+
+
+    // Remove user from lobby
+    var lobby = lobbies[lobbyID];
+    lobby.removeUser(socket.user.id);
+    socket.user.currentLobby = -1;
+    socket.user.ready = false;
+    socket.leave(lobby.name);
+    socket.emit('disconnectedFromLobby', "Disconnected from lobby");
+
+
+    // Alert and disconnect (if game was running) users still in lobby
+    if(lobby.game.gameStarted === true) {
+        if(lobby.game.gameOver === true) {
+            sendCurrentLobbyData(0, lobbyID);
+        } else {
+            io.to(lobby.name).emit('gameOverError', "Opponent has disconnected. You have been removed from the lobby");
+            resetLobby(lobbyID);
+        }
+    } else {
+        sendCurrentLobbyData(0, lobbyID);
+    }
+
+    sendAllLobbyData();
+}
+
+
+// Removes all players from a lobby
+function resetLobby(lobbyID) {
+    
+    // Remove players from socket room
+    var roomName = lobbies[lobbyID].name;
+    var socketsInRoom = io.nsps['/'].adapter.rooms[roomName].sockets;
+
+    
+    for(var socketID in socketsInRoom) {
+        console.log("removing user from lobby room...");
+        var socket = io.sockets.connected[socketID];
+        socket.leave(roomName);
+        socket.user.ready = false;
+    }
+    
+    lobbies[lobbyID].reset();
+}
+
+
+// Sends specified user(s) all lobbies
+function sendAllLobbyData(socket) {
+    if(socket) {
+        socket.emit('allLobbyData', lobbies);
+    } else {
+        io.sockets.emit('allLobbyData', lobbies);
+    }
+}
+
+
+// Sends specified user(s) their current lobby data
+function sendCurrentLobbyData(socket, lobbyID) {
+    console.log("sending currentLobbyData...");
+
+    // Validate lobby
+    if(lobbyID == -1) {
+        return;
+    }
+
+
+    // Send to single user or all users in this lobby
+    if(socket != 0) {
+        socket.emit('currentLobbyData', lobbies[lobbyID]);
+    } else {
+        io.to(lobbies[lobbyID].name).emit('currentLobbyData', lobbies[lobbyID]);
+    }
+}
+
+
+
+// Sends specified user(s) their game data
+function sendGameData(socket, lobby) {
+    // Send to single user or all users in this lobby
+    if(socket != 0) {
+        
+        // Make sure user is in a lobby
+        var lobbyID = socket.user.currentLobby;
+        if(lobbyID == -1) {
+            return;
+        }
+
+        var game = lobbies[lobbyID].game;
+        socket.emit('gameData', game, socket.user.playerNumber);
+    } else {
+        io.to(lobby.name).emit('gameData', lobby.game, -1);
+    }
+}
+
+
+// Notifies all players in lobby that the game is over
+function sendGameOverMessage(lobby) {
+    var winnerID = lobby.game.winner - 1;
+    var winner = lobby.users[winnerID].name;
+
+    io.to(lobby.name).emit('gameOver', winner);
+}

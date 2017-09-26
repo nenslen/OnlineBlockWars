@@ -67,7 +67,7 @@ function BlockPuzzle() {
 		this.swapTurns();
 
 		if(this.movesExist() === false) {
-			this.swapTurns();
+			//this.swapTurns();
 			this.gameOver = true;
 			this.winner = this.currentPlayer;
 		}
@@ -89,7 +89,7 @@ function BlockPuzzle() {
 
 
 			// Make sure block is in bounds
-			if(x1 < 0 || x1 >= gridSize || y1 < 0 || y1 >= gridSize) {
+			if(x1 < 0 || x1 >= this.gridSize || y1 < 0 || y1 >= this.gridSize) {
 				return false;
 			}
 
@@ -188,3 +188,145 @@ function BlockPuzzle() {
 		}
 	}
 }
+
+
+var PieceTypes = Object.freeze({PIECE1x1: 0, PIECE1x2: 1, PIECE1x3: 2, PIECE1x4: 3, PIECE1x5: 4, PIECE2x1: 5,
+                                PIECE2x2: 6, PIECE3x1: 7, PIECE3x3: 8, PIECE4x1: 9, PIECESmallL: 10, PIECEBigL: 11,
+                                PIECEHorJ: 12, PIECEs: 13, PIECEt: 14, PIECEVertJ: 15});
+
+
+function Block(x, y) {
+	this.x = x;
+	this.y = y;
+}
+
+
+function Tile() {
+	this.value = 0;
+	this.delete = false;
+}
+
+
+function Player(id) {
+	this.id = 0;
+	this.xp = 0;
+	this.piece = new Piece();
+
+	if(id) { this.id = id; }
+}
+
+
+function Piece(pieceType) {
+
+	var type;
+	this.blocks = [];
+
+
+	// Set piece type
+	if(pieceType && pieceType > 0 || pieceType == 0) {
+		type = pieceType;
+	} else {
+		var numTypes = Object.keys(PieceTypes).length;
+		type = Math.floor(Math.random() * numTypes);
+	}
+	
+
+	// Create piece
+	switch(type) {
+		case PieceTypes.PIECE1x1:
+			this.blocks[0] = new Block(0, 0);
+			break;
+		case PieceTypes.PIECE1x2:
+			this.blocks[0] = new Block(0, 0);
+			this.blocks[1] = new Block(0, 1);
+			break;
+		case PieceTypes.PIECE1x3:
+			this.blocks[0] = new Block(0, -1);
+	        this.blocks[1] = new Block(0, 0);
+	        this.blocks[2] = new Block(0, 1);
+			break;
+		case PieceTypes.PIECE1x4:
+			this.blocks[0] = new Block(0, -1);
+        	this.blocks[1] = new Block(0, 0);
+        	this.blocks[2] = new Block(0, 1);
+        	this.blocks[3] = new Block(0, 2);
+			break;
+		case PieceTypes.PIECE1x5:
+			this.blocks[0] = new Block(0, -2);
+	        this.blocks[1] = new Block(0, -1);
+	        this.blocks[2] = new Block(0, 0);
+	        this.blocks[3] = new Block(0, 1);
+	        this.blocks[4] = new Block(0, 2);
+			break;
+		case PieceTypes.PIECE2x1:
+			this.blocks[0] = new Block(0, 0);
+        	this.blocks[1] = new Block(1, 0);
+			break;
+		case PieceTypes.PIECE2x2:
+			this.blocks[0] = new Block(0, 0);
+	        this.blocks[1] = new Block(0, 1);
+	        this.blocks[2] = new Block(1, 0);
+	        this.blocks[3] = new Block(1, 1);
+			break;
+		case PieceTypes.PIECE3x1:
+			this.blocks[0] = new Block(-1, 0);
+	        this.blocks[1] = new Block(0, 0);
+	        this.blocks[2] = new Block(1, 0);
+			break;
+		case PieceTypes.PIECE3x3:
+			this.blocks[0] = new Block(-1, -1);
+	        this.blocks[1] = new Block(-1, 0);
+	        this.blocks[2] = new Block(-1, 1);
+	        this.blocks[3] = new Block(0, -1);
+	        this.blocks[4] = new Block(0, 0);
+	        this.blocks[5] = new Block(0, 1);
+	        this.blocks[6] = new Block(1, -1);
+	        this.blocks[7] = new Block(1, 0);
+	        this.blocks[8] = new Block(1, 1);
+			break;
+		case PieceTypes.PIECE4x1:
+			this.blocks[0] = new Block(-1, 0);
+	        this.blocks[1] = new Block(0, 0);
+	        this.blocks[2] = new Block(1, 0);
+	        this.blocks[3] = new Block(2, 0);
+			break;
+		case PieceTypes.PIECESmallL:
+			this.blocks[0] = new Block(0, 0);
+	        this.blocks[1] = new Block(0, 1);
+	        this.blocks[2] = new Block(1, 0);
+			break;
+		case PieceTypes.PIECEBigL:
+			this.blocks[0] = new Block(0, -2);
+	        this.blocks[1] = new Block(0, -1);
+	        this.blocks[2] = new Block(0, 0);
+	        this.blocks[3] = new Block(1, 0);
+	        this.blocks[4] = new Block(2, 0);
+			break;
+		case PieceTypes.PIECEHorJ:
+			this.blocks[0] = new Block(-1, 0);
+	        this.blocks[1] = new Block(0, 0);
+	        this.blocks[2] = new Block(0, 1);
+	        this.blocks[3] = new Block(0, 2);
+			break;
+		case PieceTypes.PIECEs:
+			this.blocks[0] = new Block(1, -1);
+	        this.blocks[1] = new Block(1, 0);
+	        this.blocks[2] = new Block(0, 0);
+	        this.blocks[3] = new Block(0, 1);
+			break;
+		case PieceTypes.PIECEt:
+			this.blocks[0] = new Block(-1, 0);
+	        this.blocks[1] = new Block(0, -1);
+	        this.blocks[2] = new Block(0, 0);
+	        this.blocks[3] = new Block(0, 1);
+			break;
+		case PieceTypes.PIECEVertJ:
+			this.blocks[0] = new Block(0, 0);
+	        this.blocks[1] = new Block(0, 1);
+	        this.blocks[2] = new Block(1, 0);
+	        this.blocks[3] = new Block(2, 0);
+			break;
+	}
+}
+
+exports.bp = BlockPuzzle;
