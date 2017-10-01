@@ -8,6 +8,13 @@
 	&:nth-child(#{$nth}+1) { clear: none }
 }
 
+$green: #2ecc71;
+$red: #e74c3c;
+$blue: #3498db;
+$yellow: #f1c40f;
+$purple: #8e44ad;
+$turquoise: #1abc9c;
+$gray: #AAA;
 
 $buttonColor: #359;
 
@@ -21,6 +28,10 @@ h1 {
 	margin-right: 50px;
 	position: relative;
 	animation: headerLeft 0.55s, headerFade 1.3s;
+	text-shadow: -1px 1px 0px darken($yellow, 10%),
+	             -2px 2px 0px darken($yellow, 10%),
+                 -3px 3px 0px darken($yellow, 20%),
+                 -4px 4px 0px darken($yellow, 30%)
 }
 
 @keyframes headerLeft {
@@ -42,24 +53,16 @@ body {
 }
 
 
-#loginView {
-	
-}
-
-$lobbyColor: lighten(gainsboro, 10%);
-$lobbyTextColor: #5b6271;
-
-#lobbyListView {
-	@include outer-container(100%);
-	display: none;
-}
 
 
-.lobbyItem {
-	background-color: $lobbyColor;
-	border: 1px solid darken($lobbyColor, 10%);
+$cardColor: lighten(gainsboro, 10%);
+$cardTextColor: #5b6271;
+
+.card {
+	background-color: $cardColor;
+	border: 1px solid darken($cardColor, 10%);
 	border-radius: 3px;
-	box-shadow: 0 2px 4px darken($lobbyColor, 10%);
+	box-shadow: 0 2px 4px darken($cardColor, 10%);
 	transition: all 0.2s ease-in-out;
 	display: flex;
 	max-width: 700px;
@@ -68,85 +71,112 @@ $lobbyTextColor: #5b6271;
 	padding-top: 10px;
 	padding-bottom: 10px;
 
-	.lobbyName {
-		color: $lobbyTextColor;
-		font-weight: bold;
-		font-family: Brandon, sans-serif;
-		text-transform: uppercase;
-		letter-spacing: 2px;
-		font-size: 2em;
-		padding: 10px;
-		text-shadow: darken(#5b6271, 10%) 1px 1px 1px;
-	}
-
-	.lobbyPlayer {
-		display: block;
-		width: 100%;
-		color: #EEE;
-		line-height: 1.5em;
-		margin: 10px;
-		padding: 5px;
-		background-color: darken($lobbyTextColor, 10%);
-		border: 1px solid darken($lobbyColor, 10%);
-		border-radius: 1px;
-		box-shadow: inset -1px -1px 10px 1px darken($lobbyTextColor, 15%);
-	}
-
-	.lobbyEmpty {
-		color: #777;
-		font-style: italic;
-	}
-
-	.lobbyItemLeft {
+	.cardLeft {
 		@include span-columns(6);
 		@include omega-reset(3n);
 		@include omega(2n);
 	}
 
-	.lobbyItemRight {
+	.cardRight {
 		@include span-columns(6);
 		@include omega-reset(3n);
 		@include omega(2n);
 		display: flex;
 	}
 
-	&:nth-child(odd) {
-		background-color: darken($lobbyColor, 10%);
+	.list:nth-child(odd) {
+		background-color: darken($cardColor, 10%);
+	}
+
+	.center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 }
 
+
+
+.lobbyName {
+	color: $cardTextColor;
+	font-weight: bold;
+	font-family: Brandon, sans-serif;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	font-size: 2em;
+	padding: 10px;
+	text-shadow: darken(#5b6271, 10%) 1px 1px 1px;
+}
+
+.lobbyPlayer {
+	display: block;
+	width: 100%;
+	color: #EEE;
+	line-height: 1.5em;
+	margin: 10px;
+	padding: 5px;
+	background-color: darken($cardTextColor, 10%);
+	border: 1px solid darken($cardColor, 10%);
+	border-radius: 1px;
+	box-shadow: inset -1px -1px 10px 1px darken($cardTextColor, 15%);
+}
+
+.lobbyEmpty {
+	color: #777;
+	font-style: italic;
+}
+
+
+#loginViewContent {
+	color: $cardTextColor;
+
+	#usernameInput {
+		padding: 10px 0 10px 15px;
+		font-size: 16px;
+	}
+}
+
+#lobbyListView {
+	@include outer-container(100%);
+	display: none;
+}
 
 #lobbyView {
 	display: none;
+}
 
-	.button {
-		width: 100%;
-		display: block;
+#gameView {
+	display: none;
+
+	#gameViewContent {
+		@include outer-container(100%);
+
+		margin-left: auto;
+		margin-right: auto;
+		max-width: 700px;
+
+		#playerContainer {
+			overflow: hidden;
+
+			#player1, #player2 {
+				@include span-columns(6);
+				@include omega-reset(3n);
+				@include omega(2n);
+			}
+		}
+
+		#gameContainer {
+			#gameContent canvas {
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 50px;
+				cursor: pointer;
+			}
+		}
 	}
 }
 
 
-#gameView {
-	display: none;
-	cursor: pointer;
-}
-
-
-
-
-
-
-
-
-
-
-$green: #2ecc71;
-$red: #e74c3c;
-$blue: #3498db;
-$yellow: #f1c40f;
-$purple: #8e44ad;
-$turquoise: #1abc9c;
-$gray: #AAA;
 
 @mixin setButtonColor($color) {
 	background: {
@@ -189,7 +219,7 @@ $gray: #AAA;
 	font-family: 'Montserrat', sans-serif;
 	font-weight: 700;
 	transition: background 450ms ease-in-out;
-
+	//transition: border-radius 0.2s;
 
 	&:hover,
 	&:focus {
@@ -225,7 +255,11 @@ $gray: #AAA;
 }
 
 
-
+.logoutButton {
+	position: fixed;
+	top: 1em;
+	right: 1em;
+}
 
 
 
@@ -299,4 +333,8 @@ $gray: #AAA;
 		4px -8px 0 white;
 		transform: rotate(45deg);
 	}
+}
+
+@keyframes pop{
+	50% { transform: scale(1.2); }
 }

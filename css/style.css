@@ -14,7 +14,8 @@ h1 {
   margin-left: 50px;
   margin-right: 50px;
   position: relative;
-  animation: headerLeft 0.55s, headerFade 1.3s; }
+  animation: headerLeft 0.55s, headerFade 1.3s;
+  text-shadow: -1px 1px 0px #c29d0b, -2px 2px 0px #c29d0b, -3px 3px 0px #927608, -4px 4px 0px #614f06; }
 
 @keyframes headerLeft {
   0% {
@@ -34,17 +35,7 @@ body {
   color: #EEE;
   font-family: 'Oswald', sans-serif; }
 
-#lobbyListView {
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  display: none; }
-  #lobbyListView::after {
-    clear: both;
-    content: "";
-    display: table; }
-
-.lobbyItem {
+.card {
   background-color: #f6f6f6;
   border: 1px solid gainsboro;
   border-radius: 3px;
@@ -56,72 +47,124 @@ body {
   margin-right: auto;
   padding-top: 10px;
   padding-bottom: 10px; }
-  .lobbyItem .lobbyName {
-    color: #5b6271;
-    font-weight: bold;
-    font-family: Brandon, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 2em;
-    padding: 10px;
-    text-shadow: #444a55 1px 1px 1px; }
-  .lobbyItem .lobbyPlayer {
-    display: block;
-    width: 100%;
-    color: #EEE;
-    line-height: 1.5em;
-    margin: 10px;
-    padding: 5px;
-    background-color: #444a55;
-    border: 1px solid gainsboro;
-    border-radius: 1px;
-    box-shadow: inset -1px -1px 10px 1px #393d47; }
-  .lobbyItem .lobbyEmpty {
-    color: #777;
-    font-style: italic; }
-  .lobbyItem .lobbyItemLeft {
+  .card .cardLeft {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .lobbyItem .lobbyItemLeft:last-child {
+    .card .cardLeft:last-child {
       margin-right: 0; }
-    .lobbyItem .lobbyItemLeft:nth-child(3n) {
+    .card .cardLeft:nth-child(3n) {
       margin-right: 2.35765%; }
-    .lobbyItem .lobbyItemLeft:nth-child(3n+1) {
+    .card .cardLeft:nth-child(3n+1) {
       clear: none; }
-    .lobbyItem .lobbyItemLeft:nth-child(2n) {
+    .card .cardLeft:nth-child(2n) {
       margin-right: 0; }
-    .lobbyItem .lobbyItemLeft:nth-child(2n+1) {
+    .card .cardLeft:nth-child(2n+1) {
       clear: left; }
-  .lobbyItem .lobbyItemRight {
+  .card .cardRight {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%;
     display: flex; }
-    .lobbyItem .lobbyItemRight:last-child {
+    .card .cardRight:last-child {
       margin-right: 0; }
-    .lobbyItem .lobbyItemRight:nth-child(3n) {
+    .card .cardRight:nth-child(3n) {
       margin-right: 2.35765%; }
-    .lobbyItem .lobbyItemRight:nth-child(3n+1) {
+    .card .cardRight:nth-child(3n+1) {
       clear: none; }
-    .lobbyItem .lobbyItemRight:nth-child(2n) {
+    .card .cardRight:nth-child(2n) {
       margin-right: 0; }
-    .lobbyItem .lobbyItemRight:nth-child(2n+1) {
+    .card .cardRight:nth-child(2n+1) {
       clear: left; }
-  .lobbyItem:nth-child(odd) {
+  .card .list:nth-child(odd) {
     background-color: gainsboro; }
+  .card .center {
+    display: flex;
+    justify-content: center;
+    align-items: center; }
+
+.lobbyName {
+  color: #5b6271;
+  font-weight: bold;
+  font-family: Brandon, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 2em;
+  padding: 10px;
+  text-shadow: #444a55 1px 1px 1px; }
+
+.lobbyPlayer {
+  display: block;
+  width: 100%;
+  color: #EEE;
+  line-height: 1.5em;
+  margin: 10px;
+  padding: 5px;
+  background-color: #444a55;
+  border: 1px solid gainsboro;
+  border-radius: 1px;
+  box-shadow: inset -1px -1px 10px 1px #393d47; }
+
+.lobbyEmpty {
+  color: #777;
+  font-style: italic; }
+
+#loginViewContent {
+  color: #5b6271; }
+  #loginViewContent #usernameInput {
+    padding: 10px 0 10px 15px;
+    font-size: 16px; }
+
+#lobbyListView {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  display: none; }
+  #lobbyListView::after {
+    clear: both;
+    content: "";
+    display: table; }
 
 #lobbyView {
   display: none; }
-  #lobbyView .button {
-    width: 100%;
-    display: block; }
 
 #gameView {
-  display: none;
-  cursor: pointer; }
+  display: none; }
+  #gameView #gameViewContent {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 700px; }
+    #gameView #gameViewContent::after {
+      clear: both;
+      content: "";
+      display: table; }
+    #gameView #gameViewContent #playerContainer {
+      overflow: hidden; }
+      #gameView #gameViewContent #playerContainer #player1, #gameView #gameViewContent #playerContainer #player2 {
+        float: left;
+        display: block;
+        margin-right: 2.35765%;
+        width: 48.82117%; }
+        #gameView #gameViewContent #playerContainer #player1:last-child, #gameView #gameViewContent #playerContainer #player2:last-child {
+          margin-right: 0; }
+        #gameView #gameViewContent #playerContainer #player1:nth-child(3n), #gameView #gameViewContent #playerContainer #player2:nth-child(3n) {
+          margin-right: 2.35765%; }
+        #gameView #gameViewContent #playerContainer #player1:nth-child(3n+1), #gameView #gameViewContent #playerContainer #player2:nth-child(3n+1) {
+          clear: none; }
+        #gameView #gameViewContent #playerContainer #player1:nth-child(2n), #gameView #gameViewContent #playerContainer #player2:nth-child(2n) {
+          margin-right: 0; }
+        #gameView #gameViewContent #playerContainer #player1:nth-child(2n+1), #gameView #gameViewContent #playerContainer #player2:nth-child(2n+1) {
+          clear: left; }
+    #gameView #gameViewContent #gameContainer #gameContent canvas {
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 50px;
+      cursor: pointer; }
 
 .button {
   box-sizing: border-box;
@@ -186,6 +229,11 @@ body {
   display: block;
   width: 100%; }
 
+.logoutButton {
+  position: fixed;
+  top: 1em;
+  right: 1em; }
+
 .readyCheckbox {
   position: absolute;
   opacity: 0;
@@ -221,5 +269,9 @@ body {
     height: 2px;
     box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white, 4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
     transform: rotate(45deg); }
+
+@keyframes pop {
+  50% {
+    transform: scale(1.2); } }
 
 /*# sourceMappingURL=style.css.map */

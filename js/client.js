@@ -2,12 +2,22 @@ var Views = Object.freeze({LOGIN: 0, LOBBYLIST: 1, LOBBY: 2, GAME: 3});
 
 var Client = {};
 Client.socket = io.connect();
+Client.loggedOut = true;
 
 
 // Connects the client to the server
 Client.connect = function(username) {
     console.log("connecting to server...");
     Client.socket.emit('connectToServer', username);
+};
+
+
+// Connects the client to the server
+Client.logout = function() {
+    console.log("disconnecting from server...");
+    Client.loggedOut = true;
+    Client.socket.emit('logout');
+    switchView(Views.LOGIN);
 };
 
 
@@ -70,7 +80,8 @@ Client.socket.on('loginError', function(message) {
 // Display login suceess message
 Client.socket.on('loginSuccess', function(message) {
     console.log("received login success");
-    //showMessage(message);
+    showMessage(message);
+    Client.loggedOut = false;
     switchView(Views.LOBBYLIST);
     Client.requestAllLobbyData();
 });
@@ -87,6 +98,9 @@ Client.socket.on('lobbyJoinError', function(message) {
 Client.socket.on('disconnectedFromLobby', function(message) {
     console.log("disconnected from lobby");
 	showMessage(message);
+
+    if(Client.loggedOut == true) { return; }
+
 	switchView(Views.LOBBYLIST);
     Client.requestAllLobbyData();
 });
@@ -95,6 +109,9 @@ Client.socket.on('disconnectedFromLobby', function(message) {
 // Update the lobby viewer
 Client.socket.on('allLobbyData', function(data) {
     console.log("received all lobby data");
+
+    if(Client.loggedOut == true) { return; }
+
     blockPuzzle.lobbies = data;
     updateLobbyListView();
 });
@@ -103,6 +120,9 @@ Client.socket.on('allLobbyData', function(data) {
 // Ask server for the current lobby data
 Client.socket.on('lobbyJoinSuccess', function() {
     console.log("lobby joined successfully");
+
+    if(Client.loggedOut == true) { return; }
+
 	switchView(Views.LOBBY);
     Client.requestCurrentLobbyData();
 });
@@ -111,6 +131,9 @@ Client.socket.on('lobbyJoinSuccess', function() {
 // Update the lobby view
 Client.socket.on('currentLobbyData', function(data) {
     console.log("received lobby data:");
+
+    if(Client.loggedOut == true) { return; }
+
     blockPuzzle.currentLobby = data;
     updateLobbyView();
 });
@@ -120,6 +143,9 @@ Client.socket.on('currentLobbyData', function(data) {
 Client.socket.on('gameOverError', function(message) {
     console.log("received game over error");
     showMessage(message);
+
+    if(Client.loggedOut == true) { return; }
+
     switchView(Views.LOBBYLIST);
     Client.requestAllLobbyData();
 });
@@ -128,7 +154,10 @@ Client.socket.on('gameOverError', function(message) {
 // Display game over message
 Client.socket.on('gameOver', function(winner) {
     console.log('received game over message');
-    alert('Game over. ' + winner + ' wins!');
+    showMessage('Game over. ' + winner + ' wins!');
+
+    if(Client.loggedOut == true) { return; }
+
     switchView(Views.LOBBYLIST);
     Client.requestAllLobbyData();
 });
@@ -145,6 +174,8 @@ Client.socket.on('placementError', function(message) {
 Client.socket.on('gameData', function(game, playerNumber) {
     console.log("receieved game data");
 
+    if(Client.loggedOut == true) { return; }
+
     blockPuzzle.grid = game.grid;
     blockPuzzle.players = game.players;
     blockPuzzle.currentPlayer = game.currentPlayer;
@@ -160,6 +191,9 @@ Client.socket.on('gameData', function(game, playerNumber) {
 // Get the match ready to begin
 Client.socket.on('gameStarting', function() {
     console.log("received game starting message");
+
+    if(Client.loggedOut == true) { return; }
+    
     switchView(Views.GAME);
     Client.requestGameData();
 });

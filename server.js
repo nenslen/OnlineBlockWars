@@ -41,21 +41,6 @@ io.on('connection', function(socket) {
 	// Connects a user to the server
     socket.on('connectToServer', function(username) {
 
-        // Verify login
-        /*
-        if(login failure) {
-            socket.emit('loginError', "Login error, incorrect username or password");
-            return;
-        }
-        */
-
-
-        // Get user's chosen image
-        /*
-        Get image from db
-        */
-
-
     	// Create a new user within the socket.user object
         socket.user = {
             id: server.lastPlayerID++,
@@ -220,11 +205,20 @@ io.on('connection', function(socket) {
             removeFromLobby(socket);
         }
     });
+
+
+    // Disconnects a player from the server
+    socket.on('logout', function() {
+        console.log('Received logout request');
+        if(socket.user) {
+            removeFromLobby(socket, true);
+        }
+    });
 });
 
 
 // Removes user from lobby and alerts other players
-function removeFromLobby(socket) {
+function removeFromLobby(socket, logout) {
 
     console.log("removing user from lobby...");
 
@@ -256,7 +250,7 @@ function removeFromLobby(socket) {
         sendCurrentLobbyData(0, lobbyID);
     }
 
-    sendAllLobbyData();
+    //sendAllLobbyData();
 }
 
 

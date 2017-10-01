@@ -9,29 +9,51 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script src="js/phaser.js"></script>
 	<script src="js/client.js"></script>
-	
-
-	<!-- TESTING ONLY --
-	<script src="blockpuzzle/blockpuzzle.js"></script>
-	<script src="blockpuzzle/piece.js"></script>
-	<script src="blockpuzzle/player.js"></script>
-	<script src="blockpuzzle/variables.js"></script>
-	-->
-
 	<script src="js/controller.js"></script>
 </head>
 <body>
 	<div id="loginView">
 		<h1>Login</h1>
-		Username: <input type="text" id="usernameInput"></br>
-		<button id="loginButton">Connect</button>
+		<div id="loginViewContent">
+			<div class="card">
+				<div class="cardLeft center">
+					Username&nbsp <input type="text" id="usernameInput">
+				</div>
+				<div class="cardRight center">
+					<button class="button" id="loginButton">Connect</button>
+				</div>
+			</div>
+		</div>
 	</div>
+
+
     <div id="lobbyListView">
+    	<h1>Lobby List</h1>
+    	<button class="button red logoutButton">Logout</button>
+    	<div id="lobbyListViewContent"></div>
     </div>
+
+
     <div id="lobbyView">
+    	<h1 id='lobbyViewHeader'>Lobby</h1>
+    	<button class="button red logoutButton">Logout</button>
+    	<div id="lobbyViewContent"></div>
     </div>
+
+
     <div id="gameView">
-    	<h1>game</h1>
+    	<h1>Game</h1>
+    	<button class="button red logoutButton">Logout</button>
+    	<div id="gameViewContent">
+    		<div id="playerContainer">
+    			<div class="card" id="player1"><img id="player1Image" src="" height="32" width="32">Player 1</div>
+    			<div class="card" id="player2"><img id="player2Image" src="" height="32" width="32">Player 2</div>
+    		</div>
+    		
+    		<div id="gameContainer">
+    			<div id="gameContent"></div>
+    		</div>
+    	</div>
     </div>
 </body>
 </html>

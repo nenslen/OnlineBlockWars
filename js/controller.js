@@ -12,7 +12,7 @@ function Block(x, y) {
 }
 
 
-var game = new Phaser.Game(GAME_SIZE, GAME_SIZE, Phaser.CANVAS, 'gameView', { preload: preload, create: create });
+var game = new Phaser.Game(GAME_SIZE, GAME_SIZE, Phaser.CANVAS, 'gameContent', { preload: preload, create: create });
 
 
 // Client side game data
@@ -27,7 +27,6 @@ var blockPuzzle = {
 };
 
 var graphicGrid = [];
-
 
 
 function preload() {
@@ -160,7 +159,9 @@ function switchView(view) {
 
     switch(view) {
         case Views.LOGIN:
+            $('#usernameInput').val('');
             $('#loginView').delay(fadeInDelay).fadeIn();
+            $('#usernameInput').focus();
             break;
         case Views.LOBBYLIST:
             $("#lobbyListView").delay(fadeInDelay).fadeIn();
@@ -181,9 +182,8 @@ function switchView(view) {
 // Updates the lobby list view
 function updateLobbyListView() {
     console.log("displaying lobby list...");
-    $('#lobbyListView').empty();
+    $('#lobbyListViewContent').empty();
 
-    $('#lobbyListView').append('<h1>Lobby List</h1>');
 
     for(var i = 0; i < blockPuzzle.lobbies.length; i++) {
         var lobby = blockPuzzle.lobbies[i];
@@ -192,8 +192,8 @@ function updateLobbyListView() {
         var output = '';
         
         output +=
-            '<div class="lobbyItem">' +
-                '<div class="lobbyItemLeft">' +
+            '<div class="card">' +
+                '<div class="cardLeft">' +
                     '<span class="lobbyName">' + name + '</span>'
         ;
 
@@ -214,14 +214,14 @@ function updateLobbyListView() {
 
         output +=
                 '</div>' +
-                '<div class="lobbyItemRight">' +
+                '<div class="cardRight">' +
                     '<button class="joinLobbyButton button ' + buttonColor + '" value="' + lobby.id + '">Join</button>' +
                 '</div>' +
             '</div>'
         ;
 
 
-        $('#lobbyListView').append(output);
+        $('#lobbyListViewContent').append(output);
     }
 }
 
@@ -229,16 +229,16 @@ function updateLobbyListView() {
 // Updates the current lobby view
 function updateLobbyView() {
     console.log("displaying lobby...");
-    $('#lobbyView').empty();
+    $('#lobbyViewContent').empty();
 
     var lobby = blockPuzzle.currentLobby;
     var output = '';
 
-    $('#lobbyView').append('<h1>' + lobby.name + '</h1>');
+    $('#lobbyViewHeader').html(lobby.name);
     
     output +=
-        '<div class="lobbyItem">' +
-            '<div class="lobbyItemLeft" style="display:flex; justify-content:center; align-items:center;"><div style="width: 100%">'
+        '<div class="card">' +
+            '<div class="cardLeft center"><div style="width: 100%">'
     ;
 
 
@@ -272,30 +272,46 @@ function updateLobbyView() {
 
     output +=
             '</div></div>' +
-            '<div class="lobbyItemRight" style="display:flex; justify-content:center; align-items:center;"><div style="width: 100%; margin: 10px;">' +
+            '<div class="cardRight center"><div style="width: 100%; margin: 10px;">' +
                 '<button id="readyUpButton" class="button green">Ready Up</button>' +
                 '<button id="leaveLobbyButton" class="button">Leave Lobby</button>' +
             '</div></div>' +
         '</div>'
     ;
 
-    $('#lobbyView').append(output);
-    //$('#readyUp').prop('checked', blockPuzzle.ready);
+    $('#lobbyViewContent').append(output);
+
+    if(blockPuzzle.ready === true) {
+        $('#readyUpButton').text('Cancel');
+        $('#readyUpButton').removeClass('green');
+        $('#readyUpButton').addClass('red');
+    } else {
+        $('#readyUpButton').text('Ready Up');
+        $('#readyUpButton').removeClass('red');
+        $('#readyUpButton').addClass('green');
+    }
 }
 
 
 // Updates the game view
 function updateGameView() {
-    $('#lobbyListView').append('<h1>Block Wars</h1>');
+    
+    // Set player cards
+    $('#player1').val(blockPuzzle.currentLobby.users[0].name);
+    $('#player2').val(blockPuzzle.currentLobby.users[1].name);
+    $('#player1Image').attr('src','images/player1.png');
+    $('#player2Image').attr('src','images/player2.png');
+    console.log("sdf");
+    
     for(var i = 0; i < GRID_SIZE; i++) {
         for(var j = 0; j < GRID_SIZE; j++) {
 
             var val = blockPuzzle.grid[i][j].value;
             
             if(val == 0) {
-                graphicGrid[i][j].graphic = "tile";
+                graphicGrid[i][j].graphic = 'tile';
             } else {
-                graphicGrid[i][j].graphic = "player" + val + "Graphic";
+                graphicGrid[i][j].graphic = 'player' + val + 'Graphic';
             }
 
             graphicGrid[i][j].loadTexture(graphicGrid[i][j].graphic, 0);
@@ -402,6 +418,7 @@ function getValidPos(piece, x, y) {
 
 $(function() {
 
+    //switchView(Views.LOGIN);
     $('#loginView').hide();
     $('#loginView').fadeIn();
 
@@ -414,6 +431,13 @@ $(function() {
         if(username != "") {
             Client.connect(username);
         }
+    });
+
+
+    // Logs user out of server
+    $(".logoutButton").click(function() {
+        console.log('logout button pressed');
+        Client.logout();
     });
 
 
@@ -439,6 +463,7 @@ $(function() {
         console.log('ready up button pressed');
 
         blockPuzzle.ready = !blockPuzzle.ready;
+
         Client.readyUp(blockPuzzle.ready);
     });
 });
